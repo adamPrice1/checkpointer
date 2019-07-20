@@ -9,6 +9,7 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet,View, TextInput, Dimensions} from 'react-native';
 import { Container, Header, Item, Input, Icon, Button, Text, Toast, Content, Root } from 'native-base';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { Font } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
 import MapView from 'react-native-maps';
@@ -155,20 +156,61 @@ export default class App extends Component<Props> {
             </Text>
           </View>
         </View>
-        <View style={{flex:3, justifyContent: 'center'}}>
-        <Header searchBar rounded>
-          <Item>
-            <Icon name="ios-search" />
-            <Input placeholder="Search" />
-            <Icon name="ios-people" />
-          </Item>
-          <Button transparent>
-            <Text>Search</Text>
-          </Button>
-        </Header>
+        <View
+          style={{flex:5}}
+        >
+        <GooglePlacesAutocomplete
+        placeholder='Enter Location'
+        minLength={2}
+        autoFocus={false}
+        returnKeyType={'default'}
+        fetchDetails={true}
+        styles={{
+          textInputContainer: {
+            backgroundColor: 'rgba(0,0,0,0)',
+            borderTopWidth: 0,
+            borderBottomWidth:0
+            },
+          textInput: {
+            marginLeft: 0,
+            marginRight: 0,
+            height: 38,
+            color: '#5d5d5d',
+            fontSize: 16
+            },
+        predefinedPlacesDescription: {
+          color: '#1faadb'
+          },
+          }}
+  currentLocation={false}
+  query={{
+        // available options: https://developers.google.com/places/web-service/autocomplete
+        key: 'AIzaSyDPq-cFiNAWKMLrJ5nBhpuosIfZWSotheM',
+        language: 'en', // language of the results
+        types: '(cities)' // default: 'geocode'
+      }}
+      onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
+      console.log(this.state.location);
+        this.setState({
+          location: {
+            latitude: details.geometry.location.lat,
+            longitude: details.geometry.location.lng,
+            latitudeDelta: 0.04,
+            longitudeDelta: Dimensions.get("window").width / Dimensions.get("window").height * 0.04
+          }})
+          _mapView.animateCamera({
+            center: {
+              latitude:details.geometry.location.lat,
+              longitude:details.geometry.location.lng,
+            }
+            })
+      }}
+/>
         </View>
         <View style={{flex:20}}>
+
         <MapView
+        ref = {(mapView) => { _mapView = mapView; }}
         initialRegion={this.state.location}
         style={styles.map}
         onPress = {this.pickLocationHandler}
